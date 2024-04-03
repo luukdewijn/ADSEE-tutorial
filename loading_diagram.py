@@ -17,8 +17,11 @@ l_f = 32.50 #fuselage length [m]
 b_n = 1.70*1.3 #nacelle width [m]
 l_nac=5.1 #nacelle length [m]
 l_fn = 14.1 #distance from the wing leading to nose [m]?? not sure about this
-l_n = c_r*0.25+l_fn-22.1#nacelle arm length [m] FIND THIS VALUE!!!!
+X_LEMAC=15.5
+l_n = X_LEMAC+c/4-22.1-l_nac #nacelle arm length [m] FIND THIS VALUE!!!! (=MAC c/4 distance - distance to back of engine)
 l_h = 16 #horizontal tail arm [m]
+print(l_n)
+
 Lambda_w = 17.5 *np.pi/180 #sweep angle [rad]
 Lambda_h_4 = 26 *np.pi/180#sweep angle [rad]
 Lambda_h_2 = 19.61 *np.pi/180 #sweep angle [rad]
@@ -73,7 +76,7 @@ X_LEMAC = 15.5 #[m]
 
 front_seat_cg = 0.2*l_f #x_cg of front row seats
 seat_pitch = 32*0.0254 #seat pitch in meters
-seat_rows = 18 #number of seat rows 4 seat rows removed iteration
+seat_rows = 18 #number of seat rows
 passenger_weight = 90 #average passenger weight in [kg] incl. carry-on luggage
 
 total_cargo_volume = 24.87 #total cargo volume in m^3
@@ -89,7 +92,7 @@ cargo_front_cg = 0.3*l_f #cargo cg location of front cargo hold FIND THESE
 cargo_rear_cg = 0.75*l_f #cargo cg location of rear cargo hold FIND THESE
 
 fuel_mass = 4905/9.81 #Fuel mass [kg]
-fuel_fraction_wing = 0 # FIND THESE FRACTIONS (find for first iteration)
+fuel_fraction_wing = 0 # FIND THESE FRACTIONS
 fuel_fraction_center = 1
 
 battery_mass=400 #battery mass [kg]
