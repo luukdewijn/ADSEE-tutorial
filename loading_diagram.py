@@ -15,6 +15,7 @@ h_f = 3.30 #fuselage height [m]
 b_f = 3.30 #fuselage width [m]
 l_f = 32.50 #fuselage length [m]
 b_n = 1.70*1.3 #nacelle width [m]
+l_nac=5.1 #nacelle length [m]
 l_n = -9.86 #nacelle arm length [m] FIND THIS VALUE!!!!
 l_h = 16 #horizontal tail arm [m]
 l_fn = 14.1 #distance from the wing leading to nose [m]?? not sure about this
@@ -32,11 +33,12 @@ T_cruise = 273.15-54.3
 delta_flap = 0.5 #flap deflection [rad]
 C_m_ac_flap = -0.25 *1.2 #zero lift moment coefficient due to flap deflection above (Read from graph L7 S23)
 C_L_0 = 0.2 #Zero AOA lift coefficient. FIND THIS VALUE!!!!
+C_L_w_cruise=0.56 # reference aerodynamic fokker
 rho_0 = 1.225 #air density at sea level [kg/m^3]
 rho_cruise = 0.30408 #air density at cruise altitude(35000ft) [kg/m^3]
 MTOW = 361646 # Max take-off weight [N]
 C_m_0_airfoil = -0.069 #FIND THIS -taken from DATCOM+assuming NACA63(2)-415
-C_m_ac_nacelle = 0 # FIND THIS?
+C_m_0_nacelle = 0.004+ (0.046-0.2*(c+l_n)/c)*(b_n+b_n*l_nac)/b # ASSUME LAMBDA = 0, low wing config a/c, ASSUME S_f=b_n*L_nac
 C_L_h = -0.35*A_h**(1/3) #Horizontal tail lift coefficient (FORMULA FROM ADSSE L8 S17)
 print(C_L_h)
 
@@ -342,6 +344,11 @@ def calculate_C_L_A_h(rho, V, S, S_h, Weight): #IDK how to find this value so i 
 
     return C_L_A_h
 
+def calculate_C_m_nac(C_m_0_nac,C_l,delta_nac):
+    C_m_nac=C_m_0_nac+C_l*delta_nac
+    return C_m_nac
+
+
 def contrallability_curve(C_L_h, C_L_A_h, lh, c, V_ratio, x_cg, x_ac, C_m_ac):
     Sh_S_contrallability = 1/(C_L_h/C_L_A_h * lh/c * V_ratio**2) * x_cg + (C_m_ac/C_L_A_h - x_ac)/(C_L_h/C_L_A_h * lh/c * V_ratio**2)
     return Sh_S_contrallability
@@ -356,7 +363,9 @@ C_m_ac_w = calculate_C_m_ac_w(C_m_0_airfoil, A_w, Lambda_w)
 C_m_ac_fuselage_cruise = calculate_delta_fus_C_m_ac(C_L_0, C_L_alpha_A_h_cruise, c, S)
 C_m_ac_fuselage_approach = calculate_delta_fus_C_m_ac(C_L_0, C_L_alpha_A_h_approach, c, S)
 
-C_m_ac_cruise = calculate_C_m_ac(C_m_ac_w, C_m_ac_flap, C_m_ac_fuselage_cruise, C_m_ac_nacelle)
+C_m_ac_nacelle_cruise = calculate_C_m_nac(C_m_0_nacelle,C_L_w_cruise,x_ac_nacelle_cruise) #assume fusellage lift coeff is very small thus wing lift = C_L_A_h
+print("Cmnac:", C_m_ac_nacelle_cruise)
+C_m_ac_cruise = calculate_C_m_ac(C_m_ac_w, C_m_ac_flap, C_m_ac_fuselage_cruise, C_m_ac_nacelle_cruise)
 
 # ======== PRINTING OF RESUTLS ========
 
@@ -380,6 +389,8 @@ print("x_ac_wf_approach:", x_ac_approach)
 
 print("C_L_A-h, cruise:", C_L_A_h_cruise)
 print("C_L_h", C_L_h)
+print("C_l_w,cruise:", C_L_w_cruise)
+print("C_l_fus,cruise:",C_L_A_h_cruise-C_L_w_cruise)
 print("C_m_ac_w", C_m_ac_w)
 print("C_m_ac_cruise", C_m_ac_cruise)
 
