@@ -121,6 +121,19 @@ current_cg = list_cg_cargo_front[-1]
 full_cg_list = np.append(full_cg_list, list_cg_cargo_front)
 full_cg_list = np.append(full_cg_list, list_cg_cargo_rear)
 
+#========== LOADING DUE TO BATTERY ============
+battery_mass_Center = current_weight + battery_mass * battery_mass_cg
+
+cg_battery_add = calculate_new_cg(current_weight,current_cg,battery_mass,battery_mass_cg )
+
+list_cg_battery_center=np.array([current_cg,cg_battery_add])
+battery_weight = np.array([current_weight,battery_mass_Center])
+
+current_weight = battery_weight[-1]
+current_cg = list_cg_battery_center[-1]
+
+full_cg_list = np.append(full_cg_list, list_cg_battery_center)
+
 # ======== LOADING DUE TO PASSENGERS ========
 list_cg_window_front = np.array([])
 list_cg_window_back = np.array([])
@@ -199,19 +212,8 @@ fuel_weight = np.array([current_weight, fuel_mass_center_wing])
 current_weight = fuel_weight[-1]
 current_cg = list_cg_fuel_wing_center[-1]
 
-#========== LOADING DUE TO BATTERY ============
-battery_mass_Center = current_weight + battery_mass * battery_mass_cg
-
-cg_battery_add = calculate_new_cg(current_weight,list_cg_fuel_wing_center[-1],battery_mass,battery_mass_cg )
-
-list_cg_battery_center=np.array([list_cg_fuel_wing_center[-1],cg_battery_add])
-battery_weight = np.array([current_weight,battery_mass_Center])
-
-current_weight = battery_weight[-1]
-current_cg = list_cg_battery_center[-1]
-
 full_cg_list = np.append(full_cg_list, list_cg_fuel_wing_center)
-full_cg_list = np.append(full_cg_list, list_cg_battery_center)
+
 cg_min = np.min(full_cg_list)
 cg_max = np.max(full_cg_list)
 
@@ -227,11 +229,11 @@ print("front cargo cg MAC:", calculate_MAC_percentage(cargo_front_cg))
 print("rear cargo cg:", cargo_rear_cg)
 print("rear cargo cg MAC:", calculate_MAC_percentage(cargo_rear_cg))
 
-print("fuel cg wing:", fuel_cg_wing)
-print("fuel cg wing MAC:", calculate_MAC_percentage(fuel_cg_wing))
 print("fuel cg center:", fuel_cg_center)
 print("fuel cg center MAC:", calculate_MAC_percentage(fuel_cg_center))
 
+print("battery cg", battery_mass_cg)
+print("battery cg center MAC:", calculate_MAC_percentage(battery_mass_cg))
 #PLOTTING OF LOADING DIAGRAM
 import matplotlib.pyplot as plt
 
@@ -363,9 +365,9 @@ C_m_ac_w = calculate_C_m_ac_w(C_m_0_airfoil, A_w, Lambda_w)
 C_m_ac_fuselage_cruise = calculate_delta_fus_C_m_ac(C_L_0, C_L_alpha_A_h_cruise, c, S)
 C_m_ac_fuselage_approach = calculate_delta_fus_C_m_ac(C_L_0, C_L_alpha_A_h_approach, c, S)
 
-C_m_ac_nacelle_cruise = calculate_C_m_nac(C_m_0_nacelle,C_L_w_cruise,x_ac_nacelle_cruise) #assume fusellage lift coeff is very small thus wing lift = C_L_A_h
+C_m_ac_nacelle_cruise = calculate_C_m_nac(C_m_0_nacelle,C_L_w_cruise,-x_ac_nacelle_cruise) #assume fusellage lift coeff is very small thus wing lift = C_L_A_h
 print("Cmnac:", C_m_ac_nacelle_cruise)
-C_m_ac_cruise = calculate_C_m_ac(C_m_ac_w, C_m_ac_flap, C_m_ac_fuselage_cruise, C_m_ac_nacelle_cruise)
+C_m_ac_cruise = calculate_C_m_ac(C_m_ac_w, C_m_ac_flap, C_m_ac_fuselage_cruise, 2*C_m_ac_nacelle_cruise) #2 nacelles present
 
 # ======== PRINTING OF RESUTLS ========
 
