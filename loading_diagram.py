@@ -14,7 +14,7 @@ lambda_w = 0.235 #taper ratio
 h_f = 3.30 #fuselage height [m]
 b_f = 3.30 #fuselage width [m]
 l_f = 32.50 #fuselage length [m]
-b_n = 1.70 #nacelle width [m]
+b_n = 1.70*1.3 #nacelle width [m]
 l_n = -9.86 #nacelle arm length [m] FIND THIS VALUE!!!!
 l_h = 16 #horizontal tail arm [m]
 l_fn = 14.1 #distance from the wing leading to nose [m]?? not sure about this
@@ -25,18 +25,18 @@ horizontal_efficiency = 0.8 #horizontal tail efficiency
 oswald_efficiency = 0.8 #horizontal tail efficiency
 downwash_rate = 0 #downwash per AOA, 0 for T-tail
 V_ratio = 1 #vertical tail velocity ratio
-V_cruise = 234.6 #cruise speed [m/s] 
-V_approach = 65.8333 #approach speed [m/s] 
+V_cruise = 213.14 #cruise speed [m/s] -f120
+V_approach = 63.754 #approach speed [m/s] -f120
 k_n = -2.5 #nacelle factor
 T_cruise = 273.15-54.3
 delta_flap = 0.5 #flap deflection [rad]
-C_m_ac_flap = -0.25 #zero lift moment coefficient due to flap deflection above (Read from graph L7 S23)
+C_m_ac_flap = -0.25 *1.2 #zero lift moment coefficient due to flap deflection above (Read from graph L7 S23)
 C_L_0 = 0.2 #Zero AOA lift coefficient. FIND THIS VALUE!!!!
 rho_0 = 1.225 #air density at sea level [kg/m^3]
 rho_cruise = 0.30408 #air density at cruise altitude(35000ft) [kg/m^3]
-MTOW = 449240 # Max take-off weight [N]
-C_m_0_airfoil = 0.1 #FIND THIS
-C_m_ac_nacelle = 0 # FIND THIS
+MTOW = 361646 # Max take-off weight [N]
+C_m_0_airfoil = -0.069 #FIND THIS -taken from DATCOM+assuming NACA63(2)-415
+C_m_ac_nacelle = 0 # FIND THIS?
 C_L_h = -0.35*A_h**(1/3) #Horizontal tail lift coefficient (FORMULA FROM ADSSE L8 S17)
 print(C_L_h)
 
@@ -64,21 +64,21 @@ print("taper wing:", lambda_w)
 # ======== LOADING DIAGRAM SHIT ========
 
 #CG VALUES
-OEW = 226910 #operating empty weight [N]
+OEW = 272502 #operating empty weight [N]
 OEW_kg = OEW/9.81 #operative emty weight [kg]
-OEW_cg = 18.58 #operating empty weight cg location [m]
+OEW_cg = 19.012 #operating empty weight cg location [m]
 X_LEMAC = 15.5 #[m]
 
 front_seat_cg = 0.2*l_f #x_cg of front row seats
 seat_pitch = 32*0.0254 #seat pitch in meters
-seat_rows = 22 #number of seat rows
+seat_rows = 18 #number of seat rows
 passenger_weight = 90 #average passenger weight in [kg] incl. carry-on luggage
 
 total_cargo_volume = 24.87 #total cargo volume in m^3
 cargo_density = 150 #cargo density in kg/m^3
 
 cargo_front_fraction = 0.7 #fraction of cargo in front cargo hold FIND THESE 
-cargo_rear_fraction = 0.3 #fraction of cargo in front cargo hold
+cargo_rear_fraction = 0.3 #fraction of cargo in rear cargo hold
 
 cargo_weight_front = cargo_front_fraction * total_cargo_volume * cargo_density
 cargo_weight_rear = cargo_rear_fraction * total_cargo_volume * cargo_density
@@ -86,12 +86,16 @@ cargo_weight_rear = cargo_rear_fraction * total_cargo_volume * cargo_density
 cargo_front_cg = 0.3*l_f #cargo cg location of front cargo hold FIND THESE
 cargo_rear_cg = 0.75*l_f #cargo cg location of rear cargo hold FIND THESE
 
-fuel_mass = 97270/9.81 #Fuel mass [kg]
-fuel_fraction_wing = 0.75 # FIND THESE FRACTIONS
-fuel_fraction_center = 0.25
+fuel_mass = 4905/9.81 #Fuel mass [kg]
+fuel_fraction_wing = 0 # FIND THESE FRACTIONS
+fuel_fraction_center = 1
+
+battery_mass=400 #battery mass [kg]
 
 fuel_cg_wing = 0.55*l_f #fuel cg location in wing FIND THESE
-fuel_cg_center = 0.5*l_f #fuel cg location in center
+fuel_cg_center = 23.56 #fuel cg location in center (=location of propulsion group)
+
+battery_mass_cg = 4.6605 #removable battery cg
 
 full_cg_list = np.array([])
 
@@ -179,22 +183,33 @@ full_cg_list = np.append(full_cg_list, list_cg_middle_back)
 
 #======== LOADING DUE TO FUEL =========
 #center tank --> wing tanks    
-fuel_mass_wing = current_weight + fuel_mass*fuel_fraction_wing
+#fuel_mass_wing = current_weight + fuel_mass*fuel_fraction_wing
 fuel_mass_center = current_weight + fuel_mass*fuel_fraction_center
 fuel_mass_center_wing = current_weight + fuel_mass*(fuel_fraction_center+fuel_fraction_wing)
 
-cg_fuel_wing_add = calculate_new_cg(current_weight, list_cg_middle_back[-1], fuel_mass*fuel_fraction_wing, fuel_cg_wing)
-cg_fuel_center_add = calculate_new_cg(current_weight+fuel_mass_wing, cg_fuel_wing_add, fuel_mass*fuel_fraction_center, fuel_cg_center)
+#cg_fuel_wing_add = calculate_new_cg(current_weight, list_cg_middle_back[-1], fuel_mass*fuel_fraction_wing, fuel_cg_wing)
+cg_fuel_center_add = calculate_new_cg(current_weight,list_cg_middle_back[-1], fuel_mass*fuel_fraction_center, fuel_cg_center)
 
-list_cg_fuel_wing_center = np.array([list_cg_middle_front[-1], cg_fuel_center_add, cg_fuel_wing_add])
+list_cg_fuel_wing_center = np.array([list_cg_middle_front[-1], cg_fuel_center_add])
 
-fuel_weight = np.array([current_weight, fuel_mass_wing, fuel_mass_center_wing])
+fuel_weight = np.array([current_weight, fuel_mass_center_wing])
 
 current_weight = fuel_weight[-1]
 current_cg = list_cg_fuel_wing_center[-1]
 
-full_cg_list = np.append(full_cg_list, list_cg_fuel_wing_center)
+#========== LOADING DUE TO BATTERY ============
+battery_mass_Center = current_weight + battery_mass * battery_mass_cg
 
+cg_battery_add = calculate_new_cg(current_weight,list_cg_fuel_wing_center[-1],battery_mass,battery_mass_cg )
+
+list_cg_battery_center=np.array([list_cg_fuel_wing_center[-1],cg_battery_add])
+battery_weight = np.array([current_weight,battery_mass_Center])
+
+current_weight = battery_weight[-1]
+current_cg = list_cg_battery_center[-1]
+
+full_cg_list = np.append(full_cg_list, list_cg_fuel_wing_center)
+full_cg_list = np.append(full_cg_list, list_cg_battery_center)
 cg_min = np.min(full_cg_list)
 cg_max = np.max(full_cg_list)
 
@@ -229,7 +244,8 @@ axs[0].plot(list_cg_aisle_front, aisle_weight, label='Aisle seat front to back')
 axs[0].plot(list_cg_aisle_back, aisle_weight, label='Aisle seat back to front')
 axs[0].plot(list_cg_middle_front, middle_weight, label='middle seat front to back')
 axs[0].plot(list_cg_middle_back, middle_weight, label='middle seat back to front')
-axs[0].plot(list_cg_fuel_wing_center, fuel_weight, label='Fuel')
+axs[0].plot(list_cg_fuel_wing_center, fuel_weight, label='Hydrogen Fuel')
+axs[0].plot(list_cg_battery_center,battery_weight,label='Battery')
 axs[0].axvline(x=cg_min, color='r', linestyle='--', label='CG Min')
 axs[0].axvline(x=cg_max, color='b', linestyle='--', label='CG Max')
 axs[0].set_xlabel('Center of gravity location [m]')
@@ -247,6 +263,7 @@ axs[1].plot(calculate_MAC_percentage(list_cg_aisle_back), aisle_weight, label='A
 axs[1].plot(calculate_MAC_percentage(list_cg_middle_front), middle_weight, label='middle seat front to back')
 axs[1].plot(calculate_MAC_percentage(list_cg_middle_back), middle_weight, label='middle seat back to front')
 axs[1].plot(calculate_MAC_percentage(list_cg_fuel_wing_center), fuel_weight, label='Fuel')
+axs[1].plot(calculate_MAC_percentage(list_cg_battery_center),battery_weight,label='Battery')
 axs[1].axvline(x=calculate_MAC_percentage(cg_min), color='r', linestyle='--', label='CG Min')
 axs[1].axvline(x=calculate_MAC_percentage(cg_max), color='b', linestyle='--', label='CG Max')
 axs[1].set_xlabel('Center of gravity location [MAC]')
@@ -338,7 +355,6 @@ C_m_ac_w = calculate_C_m_ac_w(C_m_0_airfoil, A_w, Lambda_w)
 
 C_m_ac_fuselage_cruise = calculate_delta_fus_C_m_ac(C_L_0, C_L_alpha_A_h_cruise, c, S)
 C_m_ac_fuselage_approach = calculate_delta_fus_C_m_ac(C_L_0, C_L_alpha_A_h_approach, c, S)
-
 
 C_m_ac_cruise = calculate_C_m_ac(C_m_ac_w, C_m_ac_flap, C_m_ac_fuselage_cruise, C_m_ac_nacelle)
 
