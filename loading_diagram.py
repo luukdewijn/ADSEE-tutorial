@@ -29,7 +29,7 @@ horizontal_efficiency = 0.8 #horizontal tail efficiency
 oswald_efficiency = 0.8 #horizontal tail efficiency
 downwash_rate = 0 #downwash per AOA, 0 for T-tail
 V_ratio = 1 #vertical tail velocity ratio
-V_cruise = 213.14 #cruise speed [m/s] -f120
+V_cruise = 210.489 #cruise speed [m/s] -f120
 V_approach = 63.754 #approach speed [m/s] -f120
 k_n = -2.5 #nacelle factor
 T_cruise = 273.15-54.3
@@ -41,7 +41,8 @@ rho_0 = 1.225 #air density at sea level [kg/m^3]
 rho_cruise = 0.30408 #air density at cruise altitude(35000ft) [kg/m^3]
 MTOW = 361646 # Max take-off weight [N]
 C_m_0_airfoil = -0.069 #FIND THIS -taken from DATCOM+assuming NACA63(2)-415
-C_m_0_nacelle = 0.004+ (0.046-0.2*(c+l_n)/c)*(b_n+b_n*l_nac)/b # ASSUME LAMBDA = 0, low wing config a/c, ASSUME S_f=b_n*L_nac
+print(b_n*l_nac/b)
+C_m_0_nacelle = 0.004 # ASSUME LAMBDA = 0, low wing config a/c, ASSUME no fillet
 C_L_h = -0.35*A_h**(1/3) #Horizontal tail lift coefficient (FORMULA FROM ADSSE L8 S17)
 print(C_L_h)
 
@@ -359,6 +360,8 @@ def contrallability_curve(C_L_h, C_L_A_h, lh, c, V_ratio, x_cg, x_ac, C_m_ac):
     return Sh_S_contrallability
  
 # ======== CONTROLLABILITY CALCULATIONS ========
+print("Here")
+print(MTOW/0.5/rho_cruise/V_cruise**2/S)
 
 C_L_A_h_cruise = calculate_C_L_A_h(rho_cruise, V_cruise, S, S_h, MTOW)
 C_L_A_h_approach = calculate_C_L_A_h(rho_0, V_approach, S, S_h, MTOW)
